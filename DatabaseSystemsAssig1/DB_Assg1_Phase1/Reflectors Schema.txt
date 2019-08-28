@@ -1,0 +1,119 @@
+
+--  NAME
+--    Reflectors.sql
+--
+-- DESCRIPTION
+--   This script creates the SQL*Plus tables of above (Reflectors) scenario.
+
+
+CREATE TABLE Member 
+ (MembershipNo INTEGER CHECK(MembershipNo>0) NOT NULL PRIMARY KEY,
+  Guestsperyear INTEGER CHECK(Guestsperyear>0) NULL,
+  Benefits VARCHAR(20) NULL,
+  Name VARCHAR(10) NULL,
+  Contact_Number NUMERIC NULL);
+
+
+CREATE TABLE Guest 
+ (ID INTEGER CHECK(ID>0) NOT NULL PRIMARY KEY,
+  Name VARCHAR(10) NOT NULL,
+  Member_MembershipNo INTEGER CHECK(Member_MembershipNo>0) NOT NULL,
+  ContactNumber NUMERIC(10) NULL,
+  CONSTRAINT Guest_FK1 FOREIGN KEY (Member_MembershipNo) REFERENCES Member(MembershipNo),
+  CONSTRAINT Guest_FK2 FOREIGN KEY (Member_MembershipNo) REFERENCES Member(MembershipNo));
+
+
+CREATE TABLE Package 
+ (PackageId INTEGER CHECK(PackageId>0) NOT NULL PRIMARY KEY,
+  Guest_ID INTEGER CHECK(Guest_ID>0) NOT NULL,
+  Member_MembershipNo INTEGER CHECK(Member_MembershipNo>0) NOT NULL,
+  Name VARCHAR(10) NULL,
+  Duration INTEGER NULL,
+  Description VARCHAR(20) NULL,
+  CONSTRAINT Package_FK1 FOREIGN KEY (Member_MembershipNo) REFERENCES Member(MembershipNo),
+  CONSTRAINT Package_FK2 FOREIGN KEY (Guest_ID) REFERENCES Guest(ID));
+
+
+CREATE TABLE BusinessCentre 
+ (CentreID INTEGER CHECK(CentreID>0) NOT NULL PRIMARY KEY,
+  Guest_ID INTEGER CHECK(Guest_ID>0) NOT NULL,
+  Member_MembershipNo INTEGER CHECK(Member_MembershipNo>0) NOT NULL,
+  CONSTRAINT BusinessCentre_FK1 FOREIGN KEY (Member_MembershipNo) REFERENCES Member(MembershipNo),
+  CONSTRAINT BusinessCentre_FK2 FOREIGN KEY (Guest_ID) REFERENCES Guest(ID));
+
+
+CREATE TABLE Services 
+ (ServiceID INTEGER CHECK(ServiceID>0) NOT NULL PRIMARY KEY,
+  Guest_ID INTEGER CHECK(Guest_ID>0) NOT NULL,
+  BusinessCentre_CentreID INTEGER CHECK(BusinessCentre_CentreID>0) NOT NULL,
+  Member_MembershipNo INTEGER CHECK(Member_MembershipNo>0) NOT NULL,
+  ServiceName VARCHAR(10) NULL,
+  CONSTRAINT Services_FK3 FOREIGN KEY (Member_MembershipNo) REFERENCES Member(MembershipNo),
+  CONSTRAINT Services_FK2 FOREIGN KEY (Guest_ID) REFERENCES Guest(ID),
+  CONSTRAINT Services_FK1 FOREIGN KEY (BusinessCentre_CentreID) REFERENCES BusinessCentre(CentreID));
+
+
+CREATE TABLE Package_has_Services 
+ (Package_PackageId INTEGER CHECK(Package_PackageId>0) NOT NULL PRIMARY KEY,
+  Services_ServiceID INTEGER CHECK(Services_ServiceID>0) NOT NULL,
+  DayNumber INTEGER CHECK(DayNumber>0) NOT NULL,
+  CONSTRAINT Package_has_Services_FK1 FOREIGN KEY (Package_PackageId) REFERENCES Package(PackageId),
+  CONSTRAINT Package_has_Services_FK2 FOREIGN KEY (Services_ServiceID) REFERENCES Services(ServiceID));
+
+
+CREATE TABLE SubTasks 
+ (TaskID INTEGER  CHECK(TaskID>0) NOT NULL PRIMARY KEY,
+  Services_ServiceID INTEGER CHECK(Services_ServiceID>0) NOT NULL,
+  TaskName VARCHAR(10) NOT NULL,
+  TaskDuration INTEGER NOT NULL,
+  TariffPrices INTEGER CHECK(TariffPrices>0) NULL,
+  MembershipPrices INTEGER CHECK(MembershipPrices>0) NULL,
+  CONSTRAINT SubTasks_FK1 FOREIGN KEY (Services_ServiceID) REFERENCES Services(ServiceID));
+
+
+CREATE TABLE Staff 
+ (StaffID INTEGER CHECK(StaffID>0) NOT NULL PRIMARY KEY,
+  Guest_ID INTEGER  CHECK(Guest_ID>0) NOT NULL,
+  BusinessCentre_CentreID INTEGER CHECK(BusinessCentre_CentreID>0) NOT NULL,
+  Member_MembershipNo INTEGER CHECK(Member_MembershipNo>0) NOT NULL,
+  StaffType VARCHAR(10) NOT NULL,
+  Name VARCHAR(10) NOT NULL,
+  FixedSalary FLOAT NULL,
+  ChargesperTask FLOAT NULL,
+  NumberofTasksperDay INTEGER CHECK(NumberofTasksperDay>0) NULL,
+  CONSTRAINT Staff_FK1 FOREIGN KEY (Member_MembershipNo) REFERENCES Member(MembershipNo),
+  CONSTRAINT Staff_FK2 FOREIGN KEY (Guest_ID) REFERENCES Guest(ID),
+  CONSTRAINT Staff_FK3 FOREIGN KEY (BusinessCentre_CentreID) REFERENCES BusinessCentre(CentreID),
+  CONSTRAINT Staff_FK4 FOREIGN KEY (BusinessCentre_CentreID) REFERENCES BusinessCentre(CentreID));
+
+
+CREATE TABLE Cosmetics 
+ (CosmeticsID INTEGER CHECK(CosmeticsID>0) NOT NULL PRIMARY KEY,
+  BusinessCentre_CentreID INTEGER CHECK(BusinessCentre_CentreID>0) NOT NULL,
+  Staff_StaffID INTEGER CHECK(Staff_StaffID>0) NOT NULL,
+  Amount INTEGER CHECK(Amount>0) NULL, 
+  Supplier VARCHAR(10) NULL,
+  OrderDate DATE NULL,
+  Description VARCHAR(20) NULL,
+  CONSTRAINT Cosmetics_FK1 FOREIGN KEY (Staff_StaffID) REFERENCES Staff(StaffID),
+  CONSTRAINT Cosmetics_FK2 FOREIGN KEY (BusinessCentre_CentreID) REFERENCES BusinessCentre(CentreID));
+
+
+CREATE TABLE Management 
+ (idManagement INTEGER CHECK(idManagement>0) NOT NULL PRIMARY KEY,
+  BusinessCentre_CentreID INTEGER CHECK(BusinessCentre_CentreID>0) NOT NULL,
+  CONSTRAINT Management_FK1 FOREIGN KEY (BusinessCentre_CentreID) REFERENCES BusinessCentre(CentreID));
+
+
+CREATE TABLE ManagementSendRecToBusCen 
+ (Management_idManagement INTEGER CHECK(Management_idManagement>0) NOT NULL PRIMARY KEY,
+  BusinessCentre_CentreID INTEGER CHECK(BusinessCentre_CentreID>0) NOT NULL,
+  Expenses FLOAT NOT NULL,
+  Revenue FLOAT NULL,
+  Dated DATE NULL,
+  CONSTRAINT ManagementSendRecToBusCen_FK1 FOREIGN KEY(Management_idManagement) REFERENCES Management(idManagement),
+  CONSTRAINT ManagementSendRecToBusCen_FK2 FOREIGN KEY(BusinessCentre_CentreID) REFERENCES BusinessCentre(CentreID));
+
+
+
+
